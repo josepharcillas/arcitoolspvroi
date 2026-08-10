@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar ROI Tracker Philippines — how much has your solar actually paid back?</title>
+<meta name="description" content="Track what your rooftop solar has actually earned back against what you paid. Enter your investment and monthly generation to see real payback progress, not a projection.">
+<link rel="canonical" href="https://pvroi.arcitools.com/">
+<meta property="og:title" content="Solar ROI Tracker Philippines">
+<meta property="og:description" content="Track what your solar system has actually paid back, using your own generation figures.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pvroi.arcitools.com/">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg:#fff; --fg:#16181d; --muted:#5c6370; --line:#e3e6ea; --card:#f7f8fa;
+    --good:#1a7f4b; --accent:#16181d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#101216; --fg:#e8eaed; --muted:#9aa0a8; --line:#262a31;
+            --card:#171a1f; --good:#4ade80; --accent:#e8eaed; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:1.5rem 1rem 4rem; background:var(--bg); color:var(--fg);
+         font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif;
+         max-width:44rem; margin-inline:auto; }
+  h1 { font-size:1.5rem; line-height:1.25; margin:0 0 .5rem; letter-spacing:-0.02em; }
+  h2 { font-size:1.05rem; margin:2.5rem 0 .75rem; }
+  .lede { color:var(--muted); margin:0 0 2rem; }
+  fieldset { border:1px solid var(--line); border-radius:.6rem; padding:1rem; margin:0 0 1rem; }
+  legend { font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:0 .4rem; }
+  label { display:block; font-size:.8rem; color:var(--muted); margin-bottom:.25rem; }
+  input { width:100%; font:inherit; padding:.6rem .7rem; border-radius:.45rem;
+          border:1px solid var(--line); background:var(--bg); color:var(--fg); }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+  .row-3 { display:grid; grid-template-columns:1fr 1fr auto; gap:.75rem; align-items:end; }
+  button { font:inherit; font-weight:600; padding:.6rem 1rem; border-radius:.45rem;
+           border:1px solid var(--accent); background:var(--accent); color:var(--bg); cursor:pointer; }
+  button.ghost { background:transparent; color:var(--fg); border-color:var(--line); }
+  .summary { display:grid; grid-template-columns:repeat(2,1fr); gap:.6rem; margin-top:1rem; }
+  .tile { border:1px solid var(--line); border-radius:.6rem; padding:.85rem; background:var(--card); }
+  .tile .k { font-size:.7rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .tile .v { font-size:1.35rem; font-weight:650; font-variant-numeric:tabular-nums; margin-top:.1rem; }
+  .tile .sub { font-size:.75rem; color:var(--muted); }
+  .bar { height:.5rem; border-radius:999px; background:var(--line); overflow:hidden; margin-top:1rem; }
+  .bar > span { display:block; height:100%; background:var(--good); width:0; }
+  table { width:100%; border-collapse:collapse; font-size:.85rem; margin-top:1rem; }
+  th { text-align:left; font-size:.7rem; text-transform:uppercase; letter-spacing:.04em;
+       color:var(--muted); padding-bottom:.35rem; }
+  td { padding:.4rem 0; border-top:1px solid var(--line); font-variant-numeric:tabular-nums; }
+  td:not(:first-child), th:not(:first-child) { text-align:right; }
+  .muted { color:var(--muted); font-size:.85rem; }
+  .scroll { overflow-x:auto; }
+  noscript { display:block; padding:.8rem; border:1px solid var(--line); border-radius:.5rem; background:var(--card); }
+</style>
+</head>
+<body>
+
+<h1>Solar ROI tracker for Philippine homeowners</h1>
+<p class="lede">
+  Find out how much of your solar investment you have actually earned back.
+  Enter what you paid and what your system has generated each month — this
+  measures real returns from your own figures rather than projecting from
+  assumptions.
+</p>
+
+<noscript>
+  The calculator needs JavaScript. The explanation below works without it.
+</noscript>
+
+<form id="form" autocomplete="off">
+  <fieldset>
+    <legend>Your system</legend>
+    <div class="row">
+      <div>
+        <label for="investment">Total investment (₱)</label>
+        <input id="investment" type="number" min="0" step="1000" placeholder="280000" inputmode="numeric">
+      </div>
+      <div>
+        <label for="rate">Your electricity rate (₱/kWh)</label>
+        <input id="rate" type="number" min="0" step="0.01" value="14.33" inputmode="decimal">
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Add a month</legend>
+    <div class="row-3">
+      <div>
+        <label for="period">Month</label>
+        <input id="period" type="month">
+      </div>
+      <div>
+        <label for="kwh">Generated (kWh)</label>
+        <input id="kwh" type="number" min="0" step="0.1" placeholder="450" inputmode="decimal">
+      </div>
+      <button type="submit">Add</button>
+    </div>
+    <p class="muted" style="margin:.6rem 0 0">
+      Your inverter app or monthly bill shows this figure. Entries are saved in
+      this browser.
+    </p>
+  </fieldset>
+</form>
+
+<div id="results" hidden>
+  <div class="bar"><span id="bar"></span></div>
+  <div class="summary" id="summary"></div>
+
+  <h2>Month by month</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Month</th><th>kWh</th><th>Value</th><th>Recovered</th><th>Left</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p style="margin-top:1rem"><button class="ghost" id="clear" type="button">Clear all entries</button></p>
+</div>
+
+<h2>How this is calculated</h2>
+<p>
+  Every kilowatt-hour your system generates is electricity you did not buy. At
+  a rate of ₱14.33/kWh — the Meralco residential figure as of May 2026 — a
+  system producing 450 kWh in a month saved roughly ₱6,450. Accumulate that
+  month after month and compare it against what you paid, and you have your
+  real payback position.
+</p>
+<p>
+  Energy you export to the grid is worth less than energy you use yourself.
+  Under Philippine net metering rules the distribution utility credits exports
+  at the generation charge, roughly half the full retail rate, so exported
+  kilowatt-hours are counted at that lower value.
+</p>
+<p>
+  The remaining time to break even is projected from your own system's average
+  so far, not from a generic assumption. With only one or two months recorded
+  that estimate will move around; it settles as you add more.
+</p>
+
+<h2>Why not just use a payback calculator?</h2>
+<p>
+  A payback calculator answers a question you ask <em>before</em> buying: given
+  assumed sun-hours, an assumed derate factor and an assumed self-consumption
+  ratio, when might this pay for itself? Every one of those inputs is an
+  estimate.
+</p>
+<p>
+  This tool answers the question you ask <em>after</em>: what did it actually
+  return? If you are still deciding whether to install, the
+  <a href="https://arcitools.com/en/solar-payback/">solar payback calculator</a>
+  is the right tool.
+</p>
+
+<h2>Frequently asked</h2>
+<p><strong>Where do I find my monthly generation?</strong><br>
+  Your inverter's app reports it — SolisCloud, FusionSolar, ShinePhone and others
+  all show a monthly total. Some electricity bills also show exported energy.</p>
+<p><strong>Should I include installation cost?</strong><br>
+  Yes. Total investment means everything you paid to get the system running:
+  panels, inverter, mounting, labour, and net-metering application fees.</p>
+<p><strong>What about battery costs?</strong><br>
+  Include them in the investment if you bought one. Batteries rarely pay back on
+  electricity savings alone; they buy you backup power during outages.</p>
+<p><strong>Is my data sent anywhere?</strong><br>
+  No. Everything stays in your browser. Nothing is uploaded, and there is no
+  account to create.</p>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const KEY = "pvroi.v1";
+const peso = new Intl.NumberFormat("en-PH", { style:"currency", currency:"PHP", maximumFractionDigits:0 });
+const num  = new Intl.NumberFormat("en-PH", { maximumFractionDigits:1 });
+
+const DEFAULT_RATE = 14.33;
+const EXPORT_CREDIT_RATIO = 0.5;
+
+// Mirrors src/lib/roi.js. Kept in sync deliberately: the page must work as a
+// static file with no API round trip, which is what keeps it crawlable and
+// instant.
+function computeRoi({ investmentPhp, entries, ratePhpPerKwh, exportCreditRatio = EXPORT_CREDIT_RATIO }) {
+  const sorted = [...entries]
+    .filter((e) => e && e.period && Number.isFinite(Number(e.kwh)))
+    .sort((a, b) => a.period.localeCompare(b.period));
+
+  let cumKwh = 0, cumSave = 0, breakEven = null;
+  const timeline = sorted.map((e) => {
+    const kwh = Number(e.kwh) || 0;
+    const exported = Math.min(Number(e.exportedKwh) || 0, kwh);
+    const value = (kwh - exported) * ratePhpPerKwh + exported * ratePhpPerKwh * exportCreditRatio;
+    cumKwh += kwh; cumSave += value;
+    if (breakEven === null && cumSave >= investmentPhp) breakEven = e.period;
+    return { period:e.period, kwh, savingsPhp:value, cumulativeSavingsPhp:cumSave,
+             remainingPhp: Math.max(0, investmentPhp - cumSave) };
+  });
+
+  const months = timeline.length;
+  const remaining = Math.max(0, investmentPhp - cumSave);
+  const avg = months ? cumSave / months : 0;
+  return {
+    months, totalKwh: cumKwh, totalSavingsPhp: cumSave, remainingPhp: remaining,
+    percentRecovered: investmentPhp > 0 ? Math.min(100, (cumSave / investmentPhp) * 100) : 0,
+    averageMonthlySavingsPhp: avg,
+    breakEvenPeriod: breakEven,
+    monthsToBreakEven: breakEven ? 0 : (avg > 0 ? Math.ceil(remaining / avg) : null),
+    costPerKwhPhp: cumKwh > 0 ? investmentPhp / cumKwh : null,
+    timeline,
+  };
+}
+
+const load = () => {
+  try { return JSON.parse(localStorage.getItem(KEY)) || { investment:0, rate:DEFAULT_RATE, entries:[] }; }
+  catch { return { investment:0, rate:DEFAULT_RATE, entries:[] }; }
+};
+const save = (s) => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {} };
+
+let state = load();
+$("investment").value = state.investment || "";
+$("rate").value = state.rate || DEFAULT_RATE;
+$("period").value = new Date().toISOString().slice(0, 7);
+
+function render() {
+  const investment = Number($("investment").value) || 0;
+  const rate = Number($("rate").value) || DEFAULT_RATE;
+  state.investment = investment; state.rate = rate;
+  save(state);
+
+  if (!state.entries.length || !investment) { $("results").hidden = true; return; }
+  $("results").hidden = false;
+
+  const r = computeRoi({ investmentPhp:investment, entries:state.entries, ratePhpPerKwh:rate });
+  $("bar").style.width = r.percentRecovered.toFixed(1) + "%";
+
+  const breakEvenText = r.breakEvenPeriod
+    ? "Reached " + r.breakEvenPeriod
+    : r.monthsToBreakEven === null
+      ? "Add a month to estimate"
+      : "~" + r.monthsToBreakEven + " months to go";
+
+  $("summary").innerHTML = [
+    ["Recovered", r.percentRecovered.toFixed(1) + "%", peso.format(r.totalSavingsPhp) + " of " + peso.format(investment)],
+    ["Still to recover", peso.format(r.remainingPhp), breakEvenText],
+    ["Generated", num.format(r.totalKwh) + " kWh", "over " + r.months + " month" + (r.months === 1 ? "" : "s")],
+    ["Cost per kWh so far", r.costPerKwhPhp ? peso.format(r.costPerKwhPhp) : "—",
+      r.costPerKwhPhp && r.costPerKwhPhp > rate ? "still above your tariff" : "now below your tariff"],
+  ].map(([k, v, sub]) =>
+    `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="sub">${sub}</div></div>`).join("");
+
+  $("rows").innerHTML = r.timeline.slice().reverse().map((t) =>
+    `<tr><td>${t.period}</td><td>${num.format(t.kwh)}</td><td>${peso.format(t.savingsPhp)}</td>` +
+    `<td>${peso.format(t.cumulativeSavingsPhp)}</td><td>${peso.format(t.remainingPhp)}</td></tr>`).join("");
+}
+
+$("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const period = $("period").value;
+  const kwh = Number($("kwh").value);
+  if (!period || !Number.isFinite(kwh) || kwh < 0) return;
+  // Re-entering a month replaces it rather than double counting.
+  state.entries = state.entries.filter((x) => x.period !== period).concat([{ period, kwh }]);
+  save(state);
+  $("kwh").value = "";
+  render();
+});
+
+$("clear").addEventListener("click", () => {
+  if (!confirm("Remove all recorded months? This cannot be undone.")) return;
+  state.entries = [];
+  save(state);
+  render();
+});
+
+for (const id of ["investment", "rate"]) $(id).addEventListener("input", render);
+render();
+</script>
+</body>
+</html>
